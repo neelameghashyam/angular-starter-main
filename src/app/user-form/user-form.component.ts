@@ -1,14 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { UserService } from '../user.service';
 
-// Angular Material modules
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
@@ -17,54 +15,56 @@ import { MatIconModule } from '@angular/material/icon';
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    RouterModule,
     MatFormFieldModule,
     MatInputModule,
-    MatSelectModule,
     MatButtonModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
     MatIconModule
   ],
   templateUrl: './user-form.component.html',
-  styleUrls: ['./user-form.component.scss']
+  styleUrl: './user-form.component.scss'
 })
-export class UserFormComponent {
-  userForm: FormGroup;
-  submitted = false;
+export class UserFormComponent implements OnInit {
+  userForm!: FormGroup;
+  userId!: number;
+  isEdit = false;
 
-  countries = ['India', 'USA', 'UK', 'Germany', 'Canada'];
+  constructor(
+    private fb: FormBuilder,
+    private userService: UserService,
+    private route: ActivatedRoute,
+    private router: Router
+  ) {}
 
-  constructor(private fb: FormBuilder) {
+  ngOnInit() {
     this.userForm = this.fb.group({
-      fullName: ['', Validators.required],
+      firstName: ['', Validators.required],
+      lastName: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      phoneNumber: ['', Validators.required],
-      dob: ['', Validators.required],
-      address: ['', Validators.required],
-      country: ['', Validators.required]
     });
-  }
 
-  get f() {
-    return this.userForm.controls;
+    this.userId = this.route.snapshot.params['id'];
+    if (this.userId) {
+      this.isEdit = true;
+      this.userService.getUser(this.userId).subscribe((user) => {
+        this.userForm.patchValue(user);
+      });
+    }
   }
 
   onSubmit() {
-    this.submitted = true;
-  
     if (this.userForm.invalid) return;
-  
-    console.log('Form Submitted:', this.userForm.value);
-  
-    // Reset the form and validation state
-    this.userForm.reset();
-    this.userForm.markAsPristine();
-    this.userForm.markAsUntouched();
-    Object.values(this.userForm.controls).forEach(control => {
-      control.setErrors(null);
-    });
-  
-    this.submitted = false;
+
+    const userData = this.userForm.value;
+
+    if (this.isEdit) {
+      this.userService.updateUser(this.userId, userData).subscribe(() => {
+        this.router.navigate(['/']);
+      });
+    } else {
+      this.userService.addUser(userData).subscribe(() => {
+        this.router.navigate(['/']);
+      });
+    }
   }
-  
 }

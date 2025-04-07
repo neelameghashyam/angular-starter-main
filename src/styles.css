@@ -10,7 +10,6 @@ html, body {
   font-family: Roboto, "Helvetica Neue", sans-serif;
 }
 
-/* Optional compact Angular Material field overrides */
 .mat-mdc-form-field {
   --mat-mdc-form-field-label-floating-padding: 0px;
   --mat-mdc-form-field-label-padding: 0px;
