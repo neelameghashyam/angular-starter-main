@@ -1,6 +1,21 @@
-/* You can add global styles to this file, and also import other style files */
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+/* Optional compact Angular Material field overrides */
+.mat-mdc-form-field {
+  --mat-mdc-form-field-label-floating-padding: 0px;
+  --mat-mdc-form-field-label-padding: 0px;
+  --mat-mdc-form-field-subscript-wrapper-padding: 0px;
+  --mat-mdc-form-field-infix-padding: 6px 8px;
+  --mat-mdc-form-field-outline-thickness: 1px;
+  --mat-mdc-form-field-container-height: auto;
+}
