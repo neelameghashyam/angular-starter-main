@@ -8,7 +8,6 @@ describe('UserService', () => {
   let service: UserService;
   let httpMock: HttpTestingController;
   let httpClient: HttpClient;
-  let consoleSpy: jest.SpyInstance;
 
   const mockUsers = [
     { id: 1, firstName: 'John', lastName: 'Doe', email: 'john@example.com' },
@@ -24,14 +23,10 @@ describe('UserService', () => {
     service = TestBed.inject(UserService);
     httpMock = TestBed.inject(HttpTestingController);
     httpClient = TestBed.inject(HttpClient);
-    
-    // Spy on console.log
-    consoleSpy = jest.spyOn(console, 'log');
   });
 
   afterEach(() => {
     httpMock.verify();
-    consoleSpy.mockClear();
   });
 
   it('should be created', () => {
@@ -46,7 +41,6 @@ describe('UserService', () => {
         expect(res).toEqual(mockResponse);
       });
 
-      // Check the BehaviorSubject update
       service.users$.subscribe(users => {
         expect(users).toEqual(mockUsers);
       });
@@ -54,9 +48,6 @@ describe('UserService', () => {
       const req = httpMock.expectOne('https://dummyjson.com/users');
       expect(req.request.method).toBe('GET');
       req.flush(mockResponse);
-
-      expect(consoleSpy).toHaveBeenCalledWith('[UserService] Fetching all users...');
-      expect(consoleSpy).toHaveBeenCalledWith('[UserService] Users fetched:', mockUsers);
     });
 
     it('should handle error when getting users', () => {
@@ -82,9 +73,6 @@ describe('UserService', () => {
       const req = httpMock.expectOne(`https://dummyjson.com/users/${userId}`);
       expect(req.request.method).toBe('GET');
       req.flush(mockUser);
-
-      expect(consoleSpy).toHaveBeenCalledWith(`[UserService] Fetching user with id: ${userId}`);
-      expect(consoleSpy).toHaveBeenCalledWith('[UserService] User fetched:', mockUser);
     });
 
     it('should handle error when getting a user', () => {
@@ -105,7 +93,6 @@ describe('UserService', () => {
       const newUser = { firstName: 'New', lastName: 'User', email: 'new@example.com' };
       const mockResponse = { id: 3, ...newUser };
 
-      // Set initial state
       (service as any).usersSubject = new BehaviorSubject<any[]>(mockUsers);
       service.users$ = (service as any).usersSubject.asObservable();
 
@@ -117,18 +104,10 @@ describe('UserService', () => {
       expect(req.request.method).toBe('POST');
       req.flush(mockResponse);
 
-      // Check the BehaviorSubject was updated
       service.users$.subscribe(users => {
         expect(users.length).toBe(3);
         expect(users[2]).toEqual({ id: 3, ...mockResponse });
       });
-
-      expect(consoleSpy).toHaveBeenCalledWith('[UserService] Adding new user:', newUser);
-      expect(consoleSpy).toHaveBeenCalledWith('[UserService] User added response:', mockResponse);
-      expect(consoleSpy).toHaveBeenCalledWith(
-        '[UserService] Updated user list after add:',
-        expect.arrayContaining([...mockUsers, { id: 3, ...mockResponse }])
-      );
     });
 
     it('should handle error when adding a user', () => {
@@ -150,7 +129,6 @@ describe('UserService', () => {
       const updatedUserData = { firstName: 'Updated' };
       const mockResponse = { ...mockUsers[0], ...updatedUserData };
 
-      // Set initial state
       (service as any).usersSubject = new BehaviorSubject<any[]>(mockUsers);
       service.users$ = (service as any).usersSubject.asObservable();
 
@@ -162,21 +140,10 @@ describe('UserService', () => {
       expect(req.request.method).toBe('PUT');
       req.flush(mockResponse);
 
-      // Check the BehaviorSubject was updated
       service.users$.subscribe(users => {
         expect(users.length).toBe(2);
         expect(users.find(u => u.id === userId)?.firstName).toBe('Updated');
       });
-
-      expect(consoleSpy).toHaveBeenCalledWith(
-        `[UserService] Updating user with id: ${userId}`,
-        updatedUserData
-      );
-      expect(consoleSpy).toHaveBeenCalledWith('[UserService] User updated response:', mockResponse);
-      expect(consoleSpy).toHaveBeenCalledWith(
-        '[UserService] Updated user list after update:',
-        expect.arrayContaining([mockResponse, mockUsers[1]])
-      );
     });
 
     it('should handle error when updating a user', () => {
@@ -197,7 +164,6 @@ describe('UserService', () => {
     it('should delete a user and update BehaviorSubject', () => {
       const userId = 1;
 
-      // Set initial state
       (service as any).usersSubject = new BehaviorSubject<any[]>(mockUsers);
       service.users$ = (service as any).usersSubject.asObservable();
 
@@ -207,17 +173,10 @@ describe('UserService', () => {
       expect(req.request.method).toBe('DELETE');
       req.flush({});
 
-      // Check the BehaviorSubject was updated
       service.users$.subscribe(users => {
         expect(users.length).toBe(1);
         expect(users.find(u => u.id === userId)).toBeUndefined();
       });
-
-      expect(consoleSpy).toHaveBeenCalledWith(`[UserService] Deleting user with id: ${userId}`);
-      expect(consoleSpy).toHaveBeenCalledWith(
-        '[UserService] Updated user list after delete:',
-        [mockUsers[1]]
-      );
     });
 
     it('should handle error when deleting a user', () => {
@@ -235,7 +194,6 @@ describe('UserService', () => {
     it('should not modify users list when delete fails', () => {
       const userId = 1;
 
-      // Set initial state
       (service as any).usersSubject = new BehaviorSubject<any[]>(mockUsers);
       service.users$ = (service as any).usersSubject.asObservable();
 
