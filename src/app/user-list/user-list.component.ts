@@ -6,6 +6,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { UserService } from '../user.service';
 import { filter } from 'rxjs/operators';
+import { ResponsiveService } from '../responsive.service';
+import { AsyncPipe } from '@angular/common';
+import { MatCardModule } from '@angular/material/card'; 
 
 @Component({
   selector: 'app-user-list',
@@ -15,28 +18,35 @@ import { filter } from 'rxjs/operators';
     RouterModule,
     MatButtonModule,
     MatIconModule,
-    MatTableModule
+    MatTableModule,
+    AsyncPipe,
+    MatCardModule
   ],
   templateUrl: './user-list.component.html',
+  styleUrls: ['./user-list.component.scss']
 })
 export class UserListComponent implements OnInit {
   users: any[] = [];
   displayedColumns = ['id', 'firstName', 'lastName', 'email', 'actions'];
+  mobileColumns = ['id','firstName', 'actions'];
 
-  constructor(private userService: UserService, private router: Router) {}
+  isHandset$ = this.responsiveService.isHandset$;
+
+  constructor(
+    private userService: UserService, 
+    private router: Router,
+    private responsiveService: ResponsiveService
+  ) {}
 
   ngOnInit() {
-    // Load initial users
     this.userService.getUsers().subscribe();
 
-    // Refresh on navigation (like after add/edit)
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe(() => {
         this.userService.getUsers().subscribe();
       });
 
-    // Keep UI synced with service data
     this.userService.users$.subscribe(users => {
       this.users = users;
     });

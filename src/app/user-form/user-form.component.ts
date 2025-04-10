@@ -9,6 +9,9 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
+import { ResponsiveService } from '../responsive.service';
+import { AsyncPipe } from '@angular/common';
+
 @Component({
   selector: 'app-user-form',
   standalone: true,
@@ -19,7 +22,8 @@ import { MatIconModule } from '@angular/material/icon';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatIconModule
+    MatIconModule,
+    AsyncPipe,
   ],
   templateUrl: './user-form.component.html',
   styleUrl: './user-form.component.scss'
@@ -28,12 +32,14 @@ export class UserFormComponent implements OnInit {
   userForm!: FormGroup;
   userId!: number;
   isEdit = false;
+  isHandset$ = this.responsiveService.isHandset$;
 
   constructor(
     private fb: FormBuilder,
     private userService: UserService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private responsiveService: ResponsiveService 
   ) {}
 
   ngOnInit() {

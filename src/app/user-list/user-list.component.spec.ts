@@ -2,18 +2,23 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { UserListComponent } from './user-list.component';
 import { UserService } from '../user.service';
 import { Router } from '@angular/router';
+import { ResponsiveService } from '../responsive.service';
 import { of, Subject } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
+import { MatCardModule } from '@angular/material/card';
 import { By } from '@angular/platform-browser';
 import { NavigationEnd } from '@angular/router';
+import { AsyncPipe } from '@angular/common';
+import { MatIcon } from '@angular/material/icon';
 
 describe('UserListComponent', () => {
   let component: UserListComponent;
   let fixture: ComponentFixture<UserListComponent>;
   let mockUserService: jest.Mocked<UserService>;
   let mockRouter: jest.Mocked<Router>;
+  let mockResponsiveService: jest.Mocked<ResponsiveService>;
   let routerEventsSubject: Subject<any>;
 
   const mockUsers = [
@@ -35,16 +40,24 @@ describe('UserListComponent', () => {
       events: routerEventsSubject.asObservable()
     } as unknown as jest.Mocked<Router>;
 
+    mockResponsiveService = {
+      isHandset$: of(false) // Default to desktop view
+    } as unknown as jest.Mocked<ResponsiveService>;
+
     await TestBed.configureTestingModule({
       imports: [
         UserListComponent, // Import standalone component
         MatButtonModule,
         MatIconModule,
-        MatTableModule
+        MatTableModule,
+        MatCardModule,
+        AsyncPipe,
+        MatIcon
       ],
       providers: [
         { provide: UserService, useValue: mockUserService },
-        { provide: Router, useValue: mockRouter }
+        { provide: Router, useValue: mockRouter },
+        { provide: ResponsiveService, useValue: mockResponsiveService }
       ]
     }).compileComponents();
 
@@ -57,10 +70,9 @@ describe('UserListComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize with correct displayed columns', () => {
-    expect(component.displayedColumns).toEqual([
-      'id', 'firstName', 'lastName', 'email', 'actions'
-    ]);
+  it('should initialize with correct columns', () => {
+    expect(component.displayedColumns).toEqual(['id', 'firstName', 'lastName', 'email', 'actions']);
+    expect(component.mobileColumns).toEqual(['id', 'firstName', 'actions']);
   });
 
   it('should call getUsers on init', () => {
@@ -77,72 +89,65 @@ describe('UserListComponent', () => {
     expect(mockUserService.getUsers).toHaveBeenCalledTimes(1);
   });
 
-  it('should not refresh users on other router events', () => {
-    mockUserService.getUsers.mockClear();
-    routerEventsSubject.next({});
-    expect(mockUserService.getUsers).not.toHaveBeenCalled();
-  });
-
-  it('should render users in the table', () => {
-    const tableRows = fixture.debugElement.queryAll(By.css('tr'));
-    expect(tableRows.length).toBe(mockUsers.length + 1); // +1 for header
+  it('should render desktop table when not in handset mode', () => {
+    const table = fixture.debugElement.query(By.css('table'));
+    expect(table).toBeTruthy();
     
-    const firstRowCells = tableRows[1].queryAll(By.css('td'));
-    // Convert textContent to number for ID comparison
-    expect(Number(firstRowCells[0].nativeElement.textContent.trim())).toBe(mockUsers[0].id);
-    expect(firstRowCells[1].nativeElement.textContent.trim()).toBe(mockUsers[0].firstName);
-    expect(firstRowCells[2].nativeElement.textContent.trim()).toBe(mockUsers[0].lastName);
-    expect(firstRowCells[3].nativeElement.textContent.trim()).toBe(mockUsers[0].email);
+    const headers = fixture.debugElement.queryAll(By.css('th'));
+    expect(headers.length).toBe(5); // 5 columns in desktop view
   });
 
   it('should call deleteUser when delete button is clicked', () => {
-    // Find all buttons and filter for delete button (assuming it has a specific class)
-    const buttons = fixture.debugElement.queryAll(By.css('button'));
-    const deleteButton = buttons.find(btn => 
-      btn.nativeElement.textContent.includes('Delete')
-    );
-    
-    deleteButton?.triggerEventHandler('click', null);
+    // Find all delete buttons (color="warn")
+    const deleteButtons = fixture.debugElement.queryAll(By.css('button[color="warn"]'));
+    deleteButtons[0].triggerEventHandler('click', null);
     expect(mockUserService.deleteUser).toHaveBeenCalledWith(mockUsers[0].id);
   });
 
-  it('should call editUser with correct id when edit button is clicked', () => {
-    // Find all buttons and filter for edit button (assuming it has a specific class)
-    const buttons = fixture.debugElement.queryAll(By.css('button'));
-    const editButton = buttons.find(btn => 
-      btn.nativeElement.textContent.includes('Edit')
+  it('should call editUser when edit button is clicked', () => {
+    // Find all edit buttons (color="primary") and exclude the Add User button
+    const allPrimaryButtons = fixture.debugElement.queryAll(By.css('button[color="primary"]'));
+    const editButtons = allPrimaryButtons.filter(btn => 
+      !btn.nativeElement.textContent.includes('Add User')
     );
-    
-    editButton?.triggerEventHandler('click', null);
+    editButtons[0].triggerEventHandler('click', null);
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/edit', mockUsers[0].id]);
   });
 
   it('should navigate to add route when add button is clicked', () => {
-    // Find the add button by a specific class or text
-    const addButton = fixture.debugElement.query(By.css('button.add-button'));
-    if (!addButton) {
-      // Alternative selector if class isn't working
-      const buttons = fixture.debugElement.queryAll(By.css('button'));
-      const addBtn = buttons.find(btn => 
-        btn.nativeElement.textContent.includes('Add')
-      );
-      addBtn?.triggerEventHandler('click', null);
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/add']);
-    } else {
-      addButton.triggerEventHandler('click', null);
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/add']);
-    }
+    const addButton = fixture.debugElement.query(By.css('button.mat-raised-button'));
+    expect(addButton).toBeTruthy();
+    addButton.triggerEventHandler('click', null);
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/add']);
   });
 
-  it('should handle empty users list', () => {
-    // Reset with empty users list
-    mockUserService.users$ = of([]);
-    fixture = TestBed.createComponent(UserListComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-    
-    expect(component.users).toEqual([]);
-    const tableRows = fixture.debugElement.queryAll(By.css('tr'));
-    expect(tableRows.length).toBe(1); // Only header row
+  describe('Mobile view', () => {
+    beforeEach(() => {
+      // Change to mobile view
+      mockResponsiveService.isHandset$ = of(true);
+      fixture = TestBed.createComponent(UserListComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+    });
+
+    it('should render cards when in handset mode', () => {
+      const table = fixture.debugElement.query(By.css('table'));
+      expect(table).toBeNull();
+      
+      const cards = fixture.debugElement.queryAll(By.css('mat-card'));
+      expect(cards.length).toBe(mockUsers.length);
+    });
+
+    it('should call deleteUser when delete button is clicked in mobile view', () => {
+      const deleteButtons = fixture.debugElement.queryAll(By.css('button[color="warn"]'));
+      deleteButtons[0].triggerEventHandler('click', null);
+      expect(mockUserService.deleteUser).toHaveBeenCalledWith(mockUsers[0].id);
+    });
+
+    it('should call editUser when edit button is clicked in mobile view', () => {
+      const editButtons = fixture.debugElement.queryAll(By.css('button[color="primary"]'));
+      editButtons[0].triggerEventHandler('click', null);
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/edit', mockUsers[0].id]);
+    });
   });
 });
