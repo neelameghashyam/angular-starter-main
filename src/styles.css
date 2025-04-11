@@ -14,7 +14,38 @@ html, body {
   --mat-mdc-form-field-label-floating-padding: 0px;
   --mat-mdc-form-field-label-padding: 0px;
   --mat-mdc-form-field-subscript-wrapper-padding: 0px;
-  --mat-mdc-form-field-infix-padding: 6px 8px;
+  --mat-mdc-form-field-infix-padding: 12px 16px; /* Increased padding */
   --mat-mdc-form-field-outline-thickness: 1px;
   --mat-mdc-form-field-container-height: auto;
+  width: 100%; /* Makes form field take full width */
+}
+
+/* Prevent label from floating/moving */
+.mat-mdc-text-field-wrapper {
+  padding: 8px 0; /* Additional padding around the field */
+}
+
+.mat-mdc-form-field-infix {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.mdc-text-field--outlined .mdc-notched-outline--upgraded .mdc-floating-label--float-above {
+  transform: none !important; /* Prevents label movement */
+}
+
+.mdc-text-field--outlined .mdc-floating-label {
+  position: static !important; /* Keeps label in place */
+  transform: none !important;
+  margin-left: 4px; /* Adjust as needed */
+}
+
+/* If you want to always show the label (not floating) */
+.mat-mdc-form-field:not(.mat-form-field-no-animate) .mat-mdc-floating-label {
+  display: none; /* Hides the floating label */
+}
+
+/* Alternative: Show a placeholder instead of a floating label */
+.mat-mdc-input-element::placeholder {
+  color: rgba(0, 0, 0, 0.6);
 }
