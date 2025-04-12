@@ -10,7 +10,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
 import { ResponsiveService } from '../responsive.service';
-import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'app-user-form',
@@ -23,7 +22,7 @@ import { AsyncPipe } from '@angular/common';
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    AsyncPipe,
+    
   ],
   templateUrl: './user-form.component.html',
   styleUrl: './user-form.component.scss'

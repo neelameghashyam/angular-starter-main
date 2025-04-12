@@ -1,15 +1,10 @@
-.container {
-    padding: 1rem;
-    max-width: 1400px;
-    margin: 0 auto;
-  
-    @media (max-width: 600px) {
-      padding: 0.5rem;
-    }
-  }
-  
-  mat-toolbar {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
+// app.component.scss
+mat-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.content-container {
+  padding: 16px; // This will add padding to your main content area
+}
