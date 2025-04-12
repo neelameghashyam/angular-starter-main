@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
   selector: 'app-subscribers',
-  imports: [],
+  imports: [MatIcon],
   templateUrl: './subscribers.component.html',
   styleUrl: './subscribers.component.scss'
 })

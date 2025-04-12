@@ -50,8 +50,8 @@
     "docs:json": "compodoc -p ./tsconfig.json -e json -d .",
     "storybook": "ng run angular-starter:storybook",
     "build-storybook": "ng run angular-starter:build-storybook",
-     "test": "jest --testPathIgnorePatterns='e2e'",
-  "e2e": "npx playwright test"
+    "test": "jest --testPathIgnorePatterns='e2e'",
+    "e2e": "npx playwright test"
   },
   "private": false,
   "dependencies": {
@@ -67,6 +67,8 @@
     "@angular/router": "^19.2.0",
     "@jsverse/transloco": "^7.5.1",
     "@tailwindcss/postcss": "^4.0.9",
+    "animate-css-grid": "^1.5.1",
+    "chart.js": "^4.4.8",
     "postcss": "^8.5.3",
     "rxjs": "~7.8.2",
     "tailwindcss": "^4.0.9",
