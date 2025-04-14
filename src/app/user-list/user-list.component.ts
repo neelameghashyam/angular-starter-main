@@ -37,6 +37,7 @@ import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
   styleUrls: ['./user-list.component.scss']
 })
 export class UserListComponent implements OnInit {
+  [x: string]: any;
   users: any[] = [];
   dataSource = new MatTableDataSource<any>();
   displayedColumns = ['id', 'firstName', 'lastName', 'email', 'actions'];

@@ -6,9 +6,13 @@ import { BehaviorSubject, Observable, tap } from 'rxjs';
   providedIn: 'root'
 })
 export class UserService {
+  static users$(users$: any) {
+    throw new Error('Method not implemented.');
+  }
   private baseUrl = 'https://dummyjson.com/users';
   private usersSubject = new BehaviorSubject<any[]>([]);
   users$ = this.usersSubject.asObservable();
+  static getUsers: any;
 
   constructor(private http: HttpClient) {}
 
